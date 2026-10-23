@@ -18,7 +18,11 @@ skill：给一个 PBL 临床案例与需要汇报的问题，自动完成调研�
 ### 推荐：skills CLI（npm 包 `skills`）
 
 ```bash
-# 全局安装到所有检测到的 agent
+# 交互式：自己勾选装到哪些 agent（推荐）
+npx skills add Shylockkkkkkok/pbl-case-report -g
+
+# 非交互：装到所有检测到的 agent
+# （少数仅支持项目级安装的 agent 会提示跳过，属正常，不影响其他 agent）
 npx skills add Shylockkkkkkok/pbl-case-report -g --all
 
 # 只装指定 agent
@@ -26,9 +30,12 @@ npx skills add Shylockkkkkkok/pbl-case-report -g -a claude-code -a codex -a open
 
 # 只看仓库里有哪些 skill，不安装
 npx skills add Shylockkkkkkok/pbl-case-report -l
+
+# 在 skills.sh 上搜索
+npx skills find pbl-case-report
 ```
 
-私有仓库需要已配置 Git / `gh` 登录
+仓库是公开的，**不需要登录**。需要 Node.js 22.20 或更高版本。
 
 各 agent 的安装目录（各自独立）：
 
