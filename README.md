@@ -1,6 +1,6 @@
 # pbl-case-report
 
-skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word 报告 + 1 份汇报 PPT**。
+skill：给一个 PBL 临床案例与需要汇报的问题，自动完成调研并产出 **1 份 Word 报告 + 1 份汇报 PPT**。
 
 ## 它做什么
 
