@@ -13,11 +13,40 @@ skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word �
 
 ## 安装
 
+这是标准的 `SKILL.md` 格式，**同一个文件夹在 Claude Code、Codex、OpenCode、Cursor、Gemini CLI 等 79 种 agent 中通用**。
+
+### 推荐：skills CLI（npm 包 `skills`）
+
 ```bash
-git clone <this-repo> ~/.claude/skills/pbl-case-report
+# 全局安装到所有检测到的 agent（默认软链接，改一处处处生效）
+npx skills add Shylockkkkkkok/pbl-case-report -g --all
+
+# 只装指定 agent
+npx skills add Shylockkkkkkok/pbl-case-report -g -a claude-code -a codex -a opencode
+
+# 只看仓库里有哪些 skill，不安装
+npx skills add Shylockkkkkkok/pbl-case-report -l
 ```
 
-然后重启 Claude Code，`/skills` 里就能看到 `pbl-case-report`。
+私有仓库需要已配置 Git / `gh` 登录；国内网络还需 `HTTPS_PROXY=http://127.0.0.1:7890`。
+
+各 agent 的安装目录（各自独立，不是共享）：
+
+| Agent | 全局路径 |
+|---|---|
+| Claude Code | `~/.claude/skills/` |
+| Codex / Cline / Gemini CLI / Cursor | `~/.agents/skills/`、`~/.gemini/skills/`、`~/.cursor/skills/` 等 |
+| OpenCode | `~/.config/opencode/skills/` |
+
+完整列表见 [docs/agents.md](https://github.com/vercel-labs/skills/blob/main/docs/agents.md)。
+
+### 手动安装（只用 Claude Code）
+
+```bash
+git clone https://github.com/Shylockkkkkkok/pbl-case-report ~/.claude/skills/pbl-case-report
+```
+
+本质就是「把文件夹放到那个位置」，ZIP 解压、`cp -r`、软链接都可以。
 
 ## 结构
 
