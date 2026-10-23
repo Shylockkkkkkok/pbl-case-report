@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+node_modules/
+preview/
+preview2/
+*.docx
+*.pptx
+*.pdf
+.DS_Store
+Thumbs.db

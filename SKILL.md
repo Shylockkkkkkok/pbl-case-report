@@ -1,0 +1,289 @@
+---
+name: pbl-case-report
+description: "Use this skill whenever the user hands you a PBL (problem-based learning) medical case — one or more 情景 PDFs or pasted case text — and wants the coursework deliverables built around a research question the case raises: a Word report that answers that question, plus a short presentation deck (usually 5 minutes). The report is an answer to a question, not a formal literature review: textbook explanations and plain reasoning are fine, journal citations are used where they carry the evidence. Trigger on PBL, 案例, 情景, 病例, case, 文献综述, 汇报PPT, 小讲课, or when the user says they will only give you the case and asks you to 调研 a topic and produce 1 份 word + 1 份 PPT. Also use it when revising formatting or content of a PBL report/deck you or a previous session produced."
+---
+
+# PBL 案例作业生成
+
+把「一个临床案例」+「一个研究问题」变成「一份 Word 报告 + 一份汇报 PPT」。本 skill 记录了一套已经过用户验收（内分泌系统 case 1，2026-10）的做法：工作流、硬性排版要求、以及踩过的坑。
+
+**报告是「答题」，不是「写综述」。** 结构服务于把问题讲清楚，不服务于体例；教材、生理/病理基础、常识性推理都是合法内容，期刊文献用在该用的地方（数字、结论、争议）。
+
+**先读本文件，再按需打开 `reference/` 里的模板代码。** 模板是可运行的真实代码，直接复制改内容，不要从零重写。
+
+| 文件 | 用途 |
+|---|---|
+| `reference/word_helpers.py` | python-docx 排版库（字体/标题/表格/题注/参考文献），含可直接跑的示例 |
+| `reference/ppt_helpers.js` | pptxgenjs 版式库（标题、要点卡、图表卡、图标、数据图适配） |
+| `reference/figures.py` | matplotlib 中文图表 + 机制通路图（含中文字体设置） |
+| `reference/qa.py` | PPT 版面几何自检 + 纯 Python 预览渲染（不启动 Office） |
+
+---
+
+## 一、整体流程
+
+1. **读案例** → 2. **定问题** → 3. **调研** → 4. **Word** → 5. **PPT** → 6. **自查** → 7. **交付**
+
+---
+
+## 二、读案例
+
+- PDF 用 Read 工具（超过 10 页加 `pages` 参数）。
+- **把案例里的临床图片抠出来复用**（查体照片、超声、X 线、病理图），这是 PPT 最真实、最有说服力的素材：
+  ```python
+  import fitz
+  d = fitz.open(path)
+  for pno in range(len(d)):
+      for i, img in enumerate(d[pno].get_images(full=True)):
+          pix = fitz.Pixmap(d, img[0])
+          if pix.n - pix.alpha >= 4: pix = fitz.Pixmap(fitz.csRGB, pix)
+          pix.save(f"assets/case_p{pno+1}_{i}.png")
+  ```
+  存下来后**逐张 Read 看一眼**再命名（`fig_eye.png` / `fig_goiter.png` …），不要凭文件名猜。
+- 提取要素：人口学、时间线、诱因、症状、查体、实验室（含**参考值和箭头方向**）、影像、家族史、医生的关键一句话。
+- **研究问题通常藏在**：医生的叮嘱/感叹、某个"看似矛盾"的化验（如催乳素轻度升高）、患者自述的生活习惯（熬夜、饮酒、节食）、案例标题的暗示（"女强人"）。
+
+## 三、调研
+
+### 网络受限时的唯一可靠路径
+
+本机环境实测（2026-10）：`WebSearch` 返回畸形结果、`WebFetch` 全部域名被拦截、Bing 经 curl 会丢掉除首个词以外的查询词、维基媒体不可达。**但 NCBI E-utilities 经 curl/python 完全可用**，这是唯一可靠的可核查文献来源。
+
+```bash
+# 检索
+curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=sleep+deprivation+AND+thyroid&retmax=25&retmode=json&sort=relevance"
+# 取摘要（efetch, retmode=xml）
+curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=42635905,37733750"
+```
+
+建议写两个小脚本：`pm.py`（esearch + esummary，打印 PMID/期刊/年份/作者）和 `pmab.py`（efetch 解析摘要）。**Windows 下务必 `PYTHONIOENCODING=utf-8`**，否则 GBK 编码会在打印特殊字符时崩溃。
+
+按证据层级检索，中英文关键词组合都要试：
+
+| 层级 | 作用 | 关键词模式 |
+|---|---|---|
+| Meta 分析 / 系统综述 | 主结论的数字来源 | `<暴露> AND <结局>`, `systematic review`, `meta-analysis` |
+| RCT | 因果证据 | `randomized`, `clinical trial` |
+| 前瞻队列 | 发病风险 | `cohort`, `incidence`, `hazard ratio` |
+| 机制综述 | 通路描述 | `mechanism`, `review`（优先 Nat Rev / Endocr Rev / Lancet 系列） |
+| 指南 | 临床标准 | `guideline`, `consensus` |
+
+### 调研纪律
+
+**哪些内容需要文献，哪些不需要**
+
+| 内容 | 来源 | 要求 |
+|---|---|---|
+| 基本概念、解剖生理、经典机制 | **教材**（《内科学》《生理学》《病理学》《诊断学》等，人卫版） | 写明教材名、版次、出版社、年份；页码不确定可不写，**不要编** |
+| 具体数字（患病率、RR/HR、效应量、样本量） | 期刊原文 | 必须有一手来源，能核到 PMID |
+| 该领域的主流结论与争议 | 系统综述 / Meta 分析 / 指南 | 优先高影响力期刊 |
+| 案例的具体表现 | case 原文 | 直接引用，标注情景号 |
+
+- **不是每个论点都要挂引文**。教材级、常识级的内容直说不必强行引文；关键数据必须有一手来源。
+- **不允许编造文献**，也不允许编造卷期页码。中文库（知网/万方/中华医学会期刊）在本环境无法在线核验，只能引你确实知道的信息；不确定的具体出处宁可省略。
+- **如实报告阴性/不显著结果**。例：UK Biobank 队列中"健康睡眠降低甲状腺疾病风险"在**甲亢亚型上未达统计学显著**——报告和 PPT 都要写出来，不能只挑阳性结果。这既是科研诚信，也是答辩时被追问时的护身符。
+- 区分**证据强度**：动物实验、机制推断要说"提示/推测"，不能写成定论。
+
+## 四、Word 报告
+
+### 结构：按「回答问题」组织，不要套综述体例
+
+**先想清楚一句话答案，再决定分几节。** 下面只是常用骨架，可增删合并：
+
+```
+标题（一行，不写副标题）
+（篇幅 >3000 字时再加 摘要 + 关键词；短报告不需要）
+
+1  问题引入        从案例的具体线索切入：为什么这个问题值得问
+2  核心回答        先给结论——通过哪几条途径、方向如何、程度多大
+3  依据与展开      教材讲机制 + 文献给证据（配 1–2 张表、1 张机制图即够）
+4  案例联系         ← 必写
+5  结论与建议      落到临床可操作的层面
+参考文献
+```
+
+各节要点：
+
+- **问题引入**：不要复述整份病历，只保留与研究问题相关的线索（时间线、化验、医生的那句话）。
+- **核心回答**：一段话讲清"是/不是、通过什么、程度如何"。老师最先看这里，别把结论埋到最后一节。
+- **依据与展开**：基础机制用教材讲透即可，不必每句挂引文；关键数字（患病率、HR、效应量）要有原文。**图表宁少勿滥**——一张把机理讲清的图，胜过五张装饰图。
+- **结论与建议**：给出可执行的判断或干预，不要停在"有待进一步研究"。
+
+篇幅：老师没规定时，2000–4000 字足够，宁短勿注水。
+
+**「案例联系」必写**，回答三件事：暴露与时间线是否吻合；症状能否一元论解释；医生的那句话有没有循证依据。长度控制在 4 段左右。
+
+### 硬性排版要求（用户明确指定，不得更改）
+
+| 项目 | 要求 |
+|---|---|
+| 字体颜色 | **全文纯黑**，包括标题、题注、表头。表头用浅灰底（`E9EDF1`）+ 黑字 |
+| 副标题 | **不要**。标题下只保留一行课程标识 |
+| 各级标题 | 中文 **黑体**（Heading 1/2/3），西文 **Times New Roman** |
+| 正文 | 中文 **宋体**，西文 **Times New Roman**，小四（12pt），1.5 倍行距，首行缩进 2 字符 |
+| 表格 | 表头跨页重复（`w:tblHeader`）、单行不跨页断开（`w:cantSplit`）、三线感/网格线、题注在表上方 |
+| 图 | 居中，宽度约 15 cm（页心宽），题注在图下方 |
+
+### ⚠️ 最大的坑：主题字体覆盖
+
+Word 内置 Heading 样式的 `<w:rFonts>` 同时带有：
+
+```xml
+w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia"
+w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"
+```
+
+**主题属性的优先级高于显式属性**。只设 `w:eastAsia="黑体"` 而不删主题属性，Word 仍会渲染主题字体（等线 Light）——标题看起来根本不是黑体，而且从属性上检查还以为改对了。
+
+正确做法（两层保险）：
+
+```python
+for attr in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+    if rf.get(qn(attr)) is not None:
+        del rf.attrib[qn(attr)]
+rf.set(qn("w:ascii"), "Times New Roman")
+rf.set(qn("w:hAnsi"), "Times New Roman")
+rf.set(qn("w:cs"), "Times New Roman")
+rf.set(qn("w:eastAsia"), "黑体")
+```
+
+然后**再给每个标题段落的 run 显式写一遍字体**，不依赖样式继承。
+
+> 验收时不能只读 `w:eastAsia`，必须同时断言主题属性残留数为 0。
+
+### 生成方式
+
+用 `python-docx`（本机可用）。`reference/word_helpers.py` 提供了 `set_font` / `h1..h3` / `title_block` / `body` / `bullet` / `keywords` / `caption` / `picture` / `make_table` / `ref` / `audit` 等函数，`set_font` 与标题样式已经内置主题属性清理。直接 `from word_helpers import *` 改内容即可。
+
+⚠️ 用 heredoc 写超长 Python 脚本会被 shell 截断（报 `unexpected EOF`）。**长脚本一律用 Write 工具落盘再运行。**
+
+## 五、PPT
+
+### 页数与时长的对应
+
+5 分钟 → **12–13 页**（含封面与参考文献页），每页 20–30 秒。宁可少一页，也不要塞满。
+
+### 推荐页序
+
+```
+1  封面（深色）
+2  案例导入（时间线 + 真实临床图片 + 医生的原话）
+3  疾病/问题背景 + 核心问题框
+4  证据一（Meta 分析图 + 要点卡）
+5  证据二（人群/队列图 + 要点卡）
+6  机制总览（通路图，满版）
+7  机制①（配节律/示意图）
+8  机制②（双栏：两条通路对照）
+9  机制③（双栏）
+10 恶性循环 / 双向关系（环形图，本页是重点）
+11 案例联系与临床启示（左"回到患者"，右"临床启示"）
+12 参考文献（整页）
+13 谢谢大家（深色，与封面呼应）
+```
+
+### 设计系统
+
+| 元素 | 取值 |
+|---|---|
+| 主色（夜晚） | `0E2233` / `17384F` / `24506B` |
+| 临床青 | `1C7293`，浅 `4FA3BF` |
+| 强调琥珀（高代谢/热） | `E8871E` |
+| 警示红 | `C0392B`（甲亢、失眠） |
+| 辅助 | 绿 `0D9488`、紫 `7A4E9B` |
+| 背景 | 内容页 `F7FAFC`，封面/结尾/参考文献页 `0E2233` |
+| 标题字体 | `Source Han Sans CN`（思源黑体），26pt 加粗 |
+| 正文字体 | `Noto Sans SC` |
+| 视觉母题 | 标题左侧 **0.085 英寸琥珀色竖条** + 封面/结尾的心电脉冲线 |
+
+**不要**用标题下划线（AI 味很重），用左侧色块代替。深色页（封面、参考文献、致谢）与浅色页交替构成"三明治"结构。
+
+### 硬性要求
+
+- **每页只要引用了文献，页脚就要有一行小字参考文献**（距底 0.7 英寸左右，8.8pt，灰色），参考文献页除外。
+- **最后一页前放参考文献整页**，再放**「谢谢大家」**页。
+- 参考文献页**不要**写"注：……"之类的说明行。
+- **字号不能太小**：正文 ≥ 12pt，卡片标题 ≥ 13pt，页脚文献 ≥ 8.8pt。图表自带的字号如果被缩放后小于 ~9pt，**要重新出图而不是硬塞**（见"图表适配"）。
+- **字与字之间不要有多余空白**：不要用 `charSpacing`；不要用全角空格 `　` 分隔数值（用 `·` 或逗号）。
+
+### 生成方式
+
+`pptxgenjs`（全局已安装）。运行前设置：
+
+```bash
+export NODE_PATH="C:/Users/86188/AppData/Roaming/npm/node_modules"
+node build_ppt.js
+```
+
+`reference/ppt_helpers.js` 提供了全套版式函数（`contentSlide` / `title` / `refLine` / `card` / `iconHead` / `chartCard` / `pointCards` / `fitBox`），复制后替换内容即可。
+
+图表用手绘：`matplotlib` 出 PNG（透明背景），或直接用 pptxgenjs 形状画（环形图、流程图）。
+
+### ⚠️ 两个必踩的坑
+
+1. **pptxgenjs 不能画负的宽/高。** 用 `x/y/w/h` 画斜线箭头时，若终点在起点左上方，会写出 `cx="-1309494"`，PowerPoint **直接打不开文件**（报"PowerPoint could not open the file"）。必须改成：
+   ```js
+   const dx = x2 - x1, dy = y2 - y1;
+   s.addShape(pptx.ShapeType.line, {
+     x: Math.min(x1, x2), y: Math.min(y1, y2),
+     w: Math.abs(dx), h: Math.abs(dy),
+     flipH: dx < 0, flipV: dy < 0,
+     line: { color, width, endArrowType: "triangle" },
+   });
+   ```
+   交付前务必扫一遍所有 slide XML 里有没有负的 `cx`/`cy`。
+
+2. **图注会和图体重叠。** 只用 `sizing:{type:"contain"}` 时图片在框内居中，按固定 y 写图注会压到坐标轴标签。要**先按真实宽高比算实际渲染尺寸**，把图注放在图片底边之下：
+   ```js
+   let dw = boxW, dh = dw / ar;
+   if (dh > boxH) { dh = boxH; dw = dh * ar; }
+   const dy = boxY + (boxH - dh) / 2;
+   // 图注 y = dy + dh + 0.06
+   ```
+   宽高比用 `PIL` 或 `sharp` 读实际像素，不要手算。
+
+### 图表适配（字号问题的根源）
+
+宽图（宽高比 ≈ 2.0）放进竖向卡片会被高度限制，两侧留白、整体缩小，图内文字跟着变小。**解决办法是重新出图，把宽高比调大**（如 1.87 → 2.19），同时把图内字号整体上调，让它在 PPT 里的实际字号 ≥ 9pt。不要靠调 PPT 文字字号来补救图片里的字。
+
+## 六、自查（交付前必做）
+
+**绝对不要用 PowerPoint COM 自动化来导出图片** —— 脚本结尾的 `$ppt.Quit()` 会关掉整个 PowerPoint 进程，把用户正在编辑的演示文稿一起关掉（用户明确反对过）。
+
+改用 `reference/qa.py`：
+
+1. **几何检查**（python-pptx 读坐标）：形状越界、文字溢出（按字号估算所需行高）、文字框互相重叠。装饰性出血圆算已知例外。
+2. **预览渲染**（PIL 直接按形状几何绘制）：用于肉眼确认。注意这是近似渲染，**不支持**：斜线形状（`prst="line"` 需单独识别）、空 `<a:ln/>`（无描边，别画边框）、PowerPoint 的断词规则（英文可能显示为断词）。
+
+Word 同理：读 XML 断言字体/颜色，不要靠肉眼。
+
+## 七、交付
+
+- 两个文件放在 case 目录下，中文文件名：`<研究问题>.docx`、`<研究问题>-汇报PPT.pptx`。
+- 中间产物（build_*.py / build_ppt.js / assets/ 图片 / 预览图）保留 build 脚本和 assets，删掉预览图和临时 ps1。
+- 汇报时说明：页数、每页讲多少秒、哪几页可以快速带过、参考文献语言与局限。
+
+## 八、检查清单
+
+复制到回复里逐条确认：
+
+**Word**
+- [ ] **研究问题有明确答案**，且在前半篇就能看到（不是埋在结论里）
+- [ ] 基础机制用教材讲清，关键数字有文献来源
+- [ ] 有「案例联系」一节
+- [ ] 全文文字为纯黑，无彩色标题/题注/表头
+- [ ] 无副标题
+- [ ] Heading 1/2/3 中文黑体、西文 Times New Roman，且**主题字体属性已清除**
+- [ ] 正文宋体 12pt，1.5 倍行距，首行缩进 2 字符
+- [ ] 表头跨页重复、行不跨页断；图表有编号题注
+- [ ] 参考文献与正文编号一一对应
+
+**PPT**
+- [ ] 12–13 页，5 分钟节奏
+- [ ] 每页都有视觉元素（图/表/图标/形状）
+- [ ] 引用当页文献的页面，页脚有参考文献
+- [ ] 倒数第二页为参考文献整页，**无"注"字说明**
+- [ ] 最后一页为「谢谢大家」
+- [ ] 正文 ≥ 12pt，无 `charSpacing`，无全角空格分隔
+- [ ] 无负的 `cx/cy`
+- [ ] 图注未压到图体
+- [ ] 未使用 PowerPoint COM
