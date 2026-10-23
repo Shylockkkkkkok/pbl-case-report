@@ -1,6 +1,6 @@
 # pbl-case-report
 
-一个 Claude Code skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word 报告 + 1 份汇报 PPT**。
+skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word 报告 + 1 份汇报 PPT**。
 
 ## 它做什么
 
@@ -22,7 +22,7 @@ git clone <this-repo> ~/.claude/skills/pbl-case-report
 ## 结构
 
 ```
-SKILL.md                  工作流、硬性排版要求、踩过的坑、验收清单
+SKILL.md                  工作流、硬性排版要求、验收清单
 reference/
   word_helpers.py         python-docx 排版库（含 Word 主题字体覆盖的修正）
   ppt_helpers.js          pptxgenjs 版式库（含防负尺寸、图注防重叠）
@@ -38,7 +38,7 @@ reference/
 
 ## 说明
 
-`reference/` 里的四个文件都是可直接运行的代码，不是伪代码。`word_helpers.py`、`figures.py` 带 `__main__` 示例，可以直接跑一遍看效果。
+`reference/` 里的四个文件都是可直接运行的代码。
 
 ## 注意
 
