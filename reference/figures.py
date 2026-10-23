@@ -13,10 +13,10 @@ matplotlib 中文图表库 —— 供 PPT / Word 内嵌
 用法：
     from figures import *
     setup()
-    effect_chart([("fT3", 3.82, 1.71, 5.94, True, "P < 0.001"),
-                  ("TSH", 1.49, 0.17, 2.81, True, "P = 0.027"),
-                  ("fT4", 0.48, -0.36, 1.33, False, "P = 0.264")],
-                 "睡眠剥夺后甲状腺指标的合并效应量", "assets/effect.png")
+    effect_chart([("指标 A", 1.82, 0.71, 2.94, True, "P < 0.001"),
+                  ("指标 B", 0.49, 0.17, 0.81, True, "P = 0.027"),
+                  ("指标 C", 0.28, -0.36, 0.93, False, "P = 0.264")],
+                 "某结局的合并效应量", "assets/effect.png")
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -260,6 +260,8 @@ if __name__ == "__main__":
     setup()
     import os
     os.makedirs("assets", exist_ok=True)
+    # ⚠️ 下面这段演示数据来自首个 PBL 案例（内分泌/睡眠），只用于验证函数能跑；
+    #    换成你的题目时整段替换，不要沿用这里的术语和数值。
     effect_chart(
         [("fT3", 3.82, 1.71, 5.94, True, "g = 3.82  (1.71–5.94)  P < 0.001"),
          ("TSH", 1.49, 0.17, 2.81, True, "g = 1.49  (0.17–2.81)  P = 0.027"),

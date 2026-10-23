@@ -5,7 +5,7 @@
  *   const { createDeck } = require("./ppt_helpers");
  *   const D = createDeck();
  *   const s = D.contentSlide("临床证据 · 1", 4);
- *   D.title(s, "证据：睡眠剥夺直接改变甲状腺轴");
+ *   D.title(s, "核心问题：X 是否导致 Y");
  *   D.chartCard(s, D.M, D.TOP, 7.35, D.CONTENT_H, "chart_effect",
  *               "assets/chart_effect.png", "数据来源：……");
  *   D.refLine(s, "[2] Jain SP, et al. J Endocrinol Invest. 2026.");
@@ -20,7 +20,7 @@ const React = require("react");
 const ReactDOMServer = require("react-dom/server");
 const sharp = require("sharp");
 
-// ---------------- 设计系统：夜晚 × 高代谢 ----------------
+// ---------------- 设计系统：默认配色（源自睡眠/内分泌案例，按选题可换） ----------------
 const C = {
   night: "0E2233", night2: "17384F", night3: "24506B",
   teal: "1C7293", tealLt: "4FA3BF", amber: "E8871E",
