@@ -13,7 +13,7 @@ skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word �
 
 ## 安装
 
-这是标准的 `SKILL.md` 格式，**同一个文件夹在 Claude Code、Codex、OpenCode、Cursor、Gemini CLI 等 79 种 agent 中通用**。
+标准的 `SKILL.md` 格式，**同一个文件夹在 Claude Code、Codex、OpenCode、Cursor、Gemini CLI 等 79 种 agent 中通用**。
 
 ### 推荐：skills CLI（npm 包 `skills`）
 
@@ -28,9 +28,9 @@ npx skills add Shylockkkkkkok/pbl-case-report -g -a claude-code -a codex -a open
 npx skills add Shylockkkkkkok/pbl-case-report -l
 ```
 
-私有仓库需要已配置 Git / `gh` 登录；国内网络还需 `HTTPS_PROXY=http://127.0.0.1:7890`。
+私有仓库需要已配置 Git / `gh` 登录
 
-各 agent 的安装目录（各自独立，不是共享）：
+各 agent 的安装目录（各自独立）：
 
 | Agent | 全局路径 |
 |---|---|
@@ -46,7 +46,7 @@ npx skills add Shylockkkkkkok/pbl-case-report -l
 git clone https://github.com/Shylockkkkkkok/pbl-case-report ~/.claude/skills/pbl-case-report
 ```
 
-本质就是「把文件夹放到那个位置」，ZIP 解压、`cp -r`、软链接都可以。
+ZIP 解压、`cp -r`、软链接都可以。
 
 ## 结构
 
@@ -69,6 +69,3 @@ reference/
 
 仅为辅助PBL学习，具体内容请自行审核！
 
-## 注意
-
-不要用 PowerPoint COM 导出图片——脚本结尾的 `Quit()` 会关掉整个 PowerPoint 进程，把正在编辑的演示文稿一起关掉。用 `qa.py`。
