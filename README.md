@@ -18,7 +18,7 @@ skill：给一个 PBL 临床案例，自动完成调研并产出 **1 份 Word �
 ### 推荐：skills CLI（npm 包 `skills`）
 
 ```bash
-# 全局安装到所有检测到的 agent（默认软链接，改一处处处生效）
+# 全局安装到所有检测到的 agent
 npx skills add Shylockkkkkkok/pbl-case-report -g --all
 
 # 只装指定 agent
