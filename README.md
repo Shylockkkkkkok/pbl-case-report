@@ -35,7 +35,7 @@ npx skills add Shylockkkkkkok/pbl-case-report -l
 npx skills find pbl-case-report
 ```
 
-仓库是公开的，**不需要登录**。需要 Node.js 22.20 或更高版本。
+需要 Node.js 22.20 或更高版本。
 
 各 agent 的安装目录（各自独立）：
 
