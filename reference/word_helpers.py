@@ -17,6 +17,8 @@ python-docx 排版库 —— PBL 文献综述报告
   · 各级标题中文黑体 / 西文 Times New Roman
   · 正文中文宋体 / 西文 Times New Roman，12pt，1.5 倍行距，首行缩进 2 字符
 """
+import re
+
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
@@ -260,10 +262,171 @@ def ref(text):
     return p
 
 
+def load(path):
+    """打开已有 docx，便于用 renumber_refs() 等函数修复。"""
+    global BLACK_DOC
+    BLACK_DOC = Document(path)
+    return BLACK_DOC
+
+
 def save(path):
     BLACK_DOC.save(path)
     import os
     print("saved:", path, os.path.getsize(path) // 1024, "KB")
+
+
+# ============================================================
+# 参考文献：顺序编码制（按正文首次引用顺序编号）
+# ============================================================
+_CITE_RE = re.compile(r"\[(\d+(?:\s*[,，、\-–—]\s*\d+)*)\]")
+
+
+def _expand_cite(group):
+    """'3-5,8' -> [3, 4, 5, 8]"""
+    nums = []
+    for part in re.split(r"[,，、]", group):
+        part = part.strip()
+        if not part:
+            continue
+        m = re.match(r"^(\d+)\s*[\-–—]\s*(\d+)$", part)
+        if m:
+            a, b = int(m.group(1)), int(m.group(2))
+            nums.extend(range(a, b + 1) if a <= b else [a])
+        elif part.isdigit():
+            nums.append(int(part))
+    return nums
+
+
+def _compress(nums):
+    """[1,2,3,5] -> '1-3,5'"""
+    nums = sorted(set(nums))
+    out, i = [], 0
+    while i < len(nums):
+        j = i
+        while j + 1 < len(nums) and nums[j + 1] == nums[j] + 1:
+            j += 1
+        if j == i:
+            out.append(str(nums[i]))
+        elif j == i + 1:
+            out.append("%d,%d" % (nums[i], nums[j]))
+        else:
+            out.append("%d-%d" % (nums[i], nums[j]))
+        i = j + 1
+    return ",".join(out)
+
+
+def _para_text(p):
+    return "".join(r.text for r in p.runs)
+
+
+def _set_para_text(p, text):
+    if not p.runs:
+        p.add_run(text)
+        return
+    p.runs[0].text = text
+    for r in p.runs[1:]:
+        r.text = ""
+
+
+def _split_refs(paras, heading):
+    for i, p in enumerate(paras):
+        if p.text.strip() == heading:
+            return i, paras[:i], paras[i + 1:]
+    return None, None, None
+
+
+def _parse_entries(tail):
+    entries, ref_paras = {}, []
+    for p in tail:
+        m = re.match(r"^\s*\[(\d+)\]\s*(.*)$", p.text.strip())
+        if m:
+            entries[int(m.group(1))] = m.group(2).strip()
+            ref_paras.append(p)
+    return entries, ref_paras
+
+
+def _cite_order(body):
+    order = []
+    for p in body:
+        for m in _CITE_RE.finditer(_para_text(p)):
+            for n in _expand_cite(m.group(1)):
+                if n not in order:
+                    order.append(n)
+    return order
+
+
+def renumber_refs(heading="参考文献", verbose=True):
+    """
+    按正文首次引用顺序重排参考文献编号（GB/T 7714 顺序编码制）。
+
+    正文可以先用任意编号写，写完调用一次即可；编号、区间、逗号列表都会重写。
+    未被正文引用的条目排在最后。**必须在 save() 之前调用。**
+    返回 {旧编号: 新编号}。
+    """
+    paras = BLACK_DOC.paragraphs
+    ri, body, tail = _split_refs(paras, heading)
+    if ri is None:
+        raise ValueError("找不到参考文献标题：%r" % heading)
+
+    order = _cite_order(body)
+    entries, ref_paras = _parse_entries(tail)
+    if not entries:
+        raise ValueError("参考文献区没有 [1] 形式的条目")
+
+    missing = [n for n in order if n not in entries]
+    if missing:
+        raise ValueError("正文引用了不存在的文献编号：%s" % sorted(set(missing)))
+
+    unused = [n for n in sorted(entries) if n not in order]
+    final = order + unused
+    old2new = {old: i + 1 for i, old in enumerate(final)}
+
+    for p in body:
+        txt = _para_text(p)
+        if not _CITE_RE.search(txt):
+            continue
+        _set_para_text(p, _CITE_RE.sub(
+            lambda m: "[%s]" % _compress([old2new[n] for n in _expand_cite(m.group(1))]), txt))
+
+    for slot, old in enumerate(final):
+        _set_para_text(ref_paras[slot], "[%d] %s" % (slot + 1, entries[old]))
+
+    if verbose:
+        changed = sum(1 for o, n in old2new.items() if o != n)
+        print("参考文献已重排：%d 条，%d 条编号变化" % (len(final), changed))
+        if unused:
+            print("  ⚠ 未被正文引用、已排在最后：%s" % unused)
+    return old2new
+
+
+def check_refs(heading="参考文献", verbose=True):
+    """校验：正文首次引用顺序必须是 1,2,3…，且与文献表一一对应。"""
+    paras = BLACK_DOC.paragraphs
+    ri, body, tail = _split_refs(paras, heading)
+    if ri is None:
+        if verbose:
+            print("参考文献检查：未找到「%s」，跳过" % heading)
+        return True
+
+    order = _cite_order(body)
+    entries, _ = _parse_entries(tail)
+    problems = []
+
+    if order != sorted(order):
+        problems.append("正文首次引用顺序不是递增：%s" % order)
+    if order and order[0] != 1:
+        problems.append("第一条引用不是 [1]：%s" % order[0])
+    if sorted(entries) != list(range(1, len(entries) + 1)):
+        problems.append("文献表编号不连续：%s" % sorted(entries))
+    cited, listed = set(order), set(entries)
+    if cited - listed:
+        problems.append("正文引用了文献表没有的编号：%s" % sorted(cited - listed))
+    if listed - cited:
+        problems.append("文献表有条目未被正文引用：%s" % sorted(listed - cited))
+
+    if verbose:
+        print("参考文献检查：", "通过" if not problems else problems)
+    return not problems
 
 
 # ============================================================
@@ -290,7 +453,8 @@ def audit():
     print("非黑色文字:", bad_color or "无")
     print("非黑体标题:", bad_head or "无")
     print("主题字体残留:", theme_left or "无")
-    return not (bad_color or bad_head or theme_left)
+    ok_refs = check_refs(verbose=True)
+    return not (bad_color or bad_head or theme_left) and ok_refs
 
 
 # ============================================================
@@ -300,7 +464,7 @@ if __name__ == "__main__":
     new_document()
     title_block("示例：某因素对某疾病的影响及机制研究", "内分泌系统与疾病 · PBL Case 1")
     h2("摘要")
-    body("这里写摘要。所有文字为黑色，标题黑体，西文 Times New Roman。")
+    body("这里写摘要。所有文字为黑色，标题黑体，西文 Times New Roman[1]。")
     keywords("关键词一；关键词二；关键词三")
     h1("1  引言")
     h2("1.1  案例背景")
