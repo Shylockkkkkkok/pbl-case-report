@@ -230,20 +230,32 @@ rf.set(qn("w:eastAsia"), "黑体")
 **可编辑的原生形状 PPT、十套配色、按论文资料自动匹配版式**，或明确指名该 skill 时，
 按它自己的 `SKILL.md` 执行，不要用本文件的版式强行套。
 
-### 两个 PPT 引擎，按需选一个（不要混用）
+### PPT 引擎：两套，按场景选一套
 
-| 场景 | 用哪套 |
-|---|---|
-| 常规 PBL / 课程汇报、5 分钟、快速成稿 | 本文件的版式（学校模板 + `reference/ppt_helpers.js`） |
-| 明确要求"可编辑的原生形状 PPT"、按论文或实验资料排版、需要十套配色与 23 类版式 | 内置引擎 `.vendor/editable-research-ppt/` |
+本 skill 自带两套 PPT 能力。**先判断用哪套，再动手；不要混用。**
 
-**用内置引擎时，先读 `.vendor/editable-research-ppt/SKILL.md`，按它执行。** 必须遵守：
+| 场景 | 引擎 | 产物 |
+|---|---|---|
+| 常规 PBL / 课程汇报、5 分钟、要快 | 本文件的版式 + `templates/xjtu/` 学校模板 | 13 页左右，半页排版 |
+| 要求原生可编辑、按论文或实验资料排版、十套配色、23 类版式 | `.vendor/editable-research-ppt/` | 可编辑 PPTX，含论文原图 |
 
-1. 依次确认：场景（学术分享 `academic` / 课程作业 `coursework` / 实验进展 `progress`）→ 配色（P1–P10）→ 填充（`light` / `solid`）。用户让你决定时用 `P1 + solid`。
-2. 生成前 `python scripts/preflight.py --input INPUT.json`；生成后用 `python scripts/inspect_deck.py` 核对对象与外链。
-3. **不得编造数据**。有论文原图时必须从原文裁取（`scripts/crop_paper_figure.py`），不能用自绘图替代；缺材料如实标注。
-4. **不要修改** `.vendor/editable-research-ppt/` 里的任何文件——它带 SHA256 完整性校验（`scripts/verify_release.py`）。要改样式就复制出来改。
-5. 素材许可与署名规则见其 `THIRD_PARTY_NOTICES.md`。
+#### 引擎 B 的完整流程（editable-research-ppt）
+
+**先读 `.vendor/editable-research-ppt/SKILL.md`，它才是该引擎的权威说明。** 接进本 skill 时，以下几条必须遵守：
+
+1. **三问**：场景（学术分享 `academic` / 课程作业 `coursework` / 实验进展 `progress`）→ 配色 P1–P10 → 填充（`light` 轻盈浅底 / `solid` 厚实实底）。已明确的沿用，不重复问；用户委托时默认 `P1 + solid`。
+2. **输入是 JSON**：逐页写 `layout`（`L1`–`L23`）与 `variant`，并显式声明 `demo: false`、`fill_style`。版式只从 `assets/template-system.json` 里选，按内容匹配，不要机械套满。
+3. **命令**（在 `.vendor/editable-research-ppt/` 目录下执行）：
+   ```console
+   python scripts/check_environment.py
+   python scripts/preflight.py --input INPUT.json
+   python scripts/generate.py --input INPUT.json --output OUTPUT.pptx --force
+   python scripts/audit.py OUTPUT.pptx --strict     # 必须 0 Error、0 Warning
+   ```
+4. **字号基线**：常规版 L1–L20 标题 42px、正文 21–25px、页脚 14px；紧凑版 L21–L23 标题 36px、正文 20–21px。不要用旧版字号规则覆盖紧凑版。
+5. **图片**：先查 `image_slots`。有论文原图时**必须从原文裁取**（`scripts/crop_paper_figure.py`，PNG 才能插入），保留原色、比例、坐标与图例；**不得用自绘图替代实测图，不得编造数据**。来源写进 `sources`。
+6. **完整性**：不要修改 `.vendor/editable-research-ppt/` 里的任何文件（它带 SHA256 校验）。要改样式就复制出来改；交付前 `python scripts/verify_release.py` 必须为 `ok`。
+7. 两套引擎**共用**本文件的参考文献规范：GB/T 7714 + 按首次引用顺序编号 + 不缺页码。
 
 ### 学校模板优先（西安交通大学）
 
