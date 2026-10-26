@@ -80,3 +80,10 @@ reference/
 ## 许可
 
 [MIT License](LICENSE) —— 可以自由使用、修改、分发，包括商业用途，保留版权声明即可。
+
+## 模板库
+
+`templates/xjtu/` 内置 7 套西安交通大学 PPT 模板（已去重），默认使用 `飞上云霄.pptx`。
+详见 [templates/xjtu/README.md](templates/xjtu/README.md)。
+
+> 全部模板合计约 62 MB，克隆仓库时会一并下载。
