@@ -1,0 +1,637 @@
+{
+  "version": "1.7.1",
+  "approved_date": "2026-10-19",
+  "canvas": {
+    "width": 1280,
+    "height": 720
+  },
+  "default_palette": "P1",
+  "fonts": {
+    "heading": "Noto Serif CJK SC",
+    "body": "Noto Sans CJK SC",
+    "latin": "Noto Sans CJK SC"
+  },
+  "sizes": {
+    "_deprecated": "仅历史记录。实际字号以 solid_typography 为准（由 scripts/fill_styles.py 实现）；所有脚本均不读取本字段。",
+    "content_title_px": 42,
+    "content_title_pt": 31.5,
+    "body_min_px": 21,
+    "body_max_px": 25,
+    "body_min_pt": 15.75,
+    "body_max_pt": 18.75,
+    "auxiliary_min_px": 17,
+    "chart_min_px": 17,
+    "footnote_px": 14
+  },
+  "spacing": {
+    "_deprecated": "仅历史记录，脚本不读取。左右内容边距见 solid_typography.content_side_margin=32。",
+    "margin": 32,
+    "gap": 18,
+    "header_bottom": 70,
+    "body_top": 86,
+    "body_bottom": 652,
+    "footer_top": 690
+  },
+  "palettes": {
+    "P1": {
+      "name": "蓝白朱红",
+      "primary": "#173D67",
+      "secondary": "#718EAA",
+      "accent": "#AF3D3D",
+      "paper": "#FFFFFF",
+      "tint": "#EEF3F8",
+      "description": "crisp porcelain white, rich ink navy, subtle slate blue, restrained vermilion. Precise, formal and luminous."
+    },
+    "P2": {
+      "name": "松绿米白",
+      "primary": "#28463A",
+      "secondary": "#8A9B81",
+      "accent": "#A8562F",
+      "paper": "#FAF9F4",
+      "tint": "#EAF0E8",
+      "description": "deep pine green, soft ivory, muted sage, a tiny terracotta accent. Quiet natural-history elegance with a botanical research sensibility."
+    },
+    "P3": {
+      "name": "石墨青金",
+      "primary": "#12303A",
+      "secondary": "#5D9298",
+      "accent": "#B08026",
+      "paper": "#FBFCFC",
+      "tint": "#EDF3F2",
+      "description": "dark graphite teal, fog white, restrained sea-glass teal and ochre gold. Sophisticated precise scientific editorial design; gold only as ink accents, never metallic."
+    },
+    "P4": {
+      "name": "酒红灰蓝",
+      "primary": "#6E293C",
+      "secondary": "#66859A",
+      "accent": "#A97738",
+      "paper": "#FFFDF9",
+      "tint": "#F4ECEE",
+      "description": "deep burgundy, warm white, desaturated steel blue, tiny antique ochre. Scholarly, mature, crisp and elegant, not wedding or luxury branding."
+    },
+    "P5": {
+      "name": "靛紫芥黄",
+      "primary": "#3F2F7A",
+      "secondary": "#8C84AE",
+      "accent": "#A58116",
+      "paper": "#FCFCFE",
+      "tint": "#F0EEF7",
+      "description": "deep ink indigo-purple, clean pearl white, muted lavender gray, restrained mustard. Precise high-end academic design, never neon or magical."
+    },
+    "P6": {
+      "name": "湖蓝珊瑚",
+      "primary": "#087F9A",
+      "secondary": "#6A9DAA",
+      "accent": "#D15B55",
+      "paper": "#FFFFFF",
+      "tint": "#EFF8FB",
+      "description": "清爽湖蓝主色，珊瑚红作少量语义强调"
+    },
+    "P7": {
+      "primary": "#A84B22",
+      "secondary": "#D5884D",
+      "accent": "#245C6D",
+      "paper": "#FFFCF7",
+      "tint": "#FFF0DF",
+      "ink": "#292C30",
+      "name": "赭橙米白",
+      "description": "温暖而清晰的科研编辑风，赭橙只承担标题、实底小标题与核心曲线，画布接近白色的暖白，正文深墨色，少量深青蓝比较色。"
+    },
+    "P8": {
+      "primary": "#15385C",
+      "secondary": "#426B91",
+      "accent": "#AE7A25",
+      "paper": "#FFFFFF",
+      "tint": "#EDF3F9",
+      "ink": "#202C3A",
+      "name": "深蓝香槟金",
+      "description": "精致的深海军蓝学术汇报，深蓝实底块配白字，香槟金只点亮小标签和重点数据，白底通透，不用金色铺满正文，不做金属质感。"
+    },
+    "P9": {
+      "primary": "#006A6C",
+      "secondary": "#168E92",
+      "accent": "#6854A4",
+      "paper": "#FFFFFF",
+      "tint": "#E8F6F4",
+      "ink": "#16393C",
+      "name": "孔雀青白",
+      "description": "清晰鲜明的孔雀青与纯白学术图表风，清爽而厚实，少量柔紫作为比较系列，正文深墨色，图表占比大、分组层级明确，避免灰绿和灰蒙蒙。"
+    },
+    "P10": {
+      "primary": "#22252A",
+      "secondary": "#616974",
+      "accent": "#BE3038",
+      "paper": "#FFFFFF",
+      "tint": "#F3F4F5",
+      "ink": "#22252A",
+      "name": "黑白朱红",
+      "description": "高质量学术期刊编辑风，近黑标题、纯白底、朱红仅用于一个关键系列或关键词，衬线大标题配现代无衬线正文，粗细线与留白形成层级，完全无花纹。"
+    }
+  },
+  "scenarios": {
+    "academic": {
+      "name": "学术分享型",
+      "focus": [
+        "研究问题",
+        "竞争解释",
+        "证据与边界",
+        "讨论"
+      ],
+      "suggested_layouts": [
+        "L5",
+        "L6",
+        "L7",
+        "L8",
+        "L9",
+        "L10",
+        "L11",
+        "L12",
+        "L14"
+      ]
+    },
+    "coursework": {
+      "name": "课程作业型",
+      "focus": [
+        "任务要求",
+        "概念与方法",
+        "比较与推导",
+        "回答与反思"
+      ],
+      "suggested_layouts": [
+        "L5",
+        "L6",
+        "L3",
+        "L9",
+        "L11",
+        "L12",
+        "L13",
+        "L14"
+      ]
+    },
+    "progress": {
+      "name": "实验进展型",
+      "focus": [
+        "本期目标",
+        "完成状态",
+        "初步结果",
+        "问题与下一步"
+      ],
+      "suggested_layouts": [
+        "L5",
+        "L2",
+        "L4",
+        "L1",
+        "L11",
+        "L12",
+        "L13",
+        "L14"
+      ]
+    }
+  },
+  "layouts": {
+    "L1": {
+      "name": "中心循环型",
+      "category": "机制与技术",
+      "purpose": "观测、建模、应用与反馈的循环关系。"
+    },
+    "L2": {
+      "name": "分层技术路线型",
+      "category": "机制与技术",
+      "purpose": "按数据、分析、验证分层展示技术路线。",
+      "variants": [
+        "default",
+        "original_figure"
+      ]
+    },
+    "L3": {
+      "name": "对照证据型",
+      "category": "结果与归纳",
+      "purpose": "统一比较条件，突出两组证据的差异。",
+      "variants": [
+        "default",
+        "swap_columns",
+        "original_figure"
+      ]
+    },
+    "L4": {
+      "name": "实验进展矩阵型",
+      "category": "结果与归纳",
+      "purpose": "按样点与任务阶段展示进展、问题和下一步。",
+      "variants": [
+        "default",
+        "original_figure"
+      ]
+    },
+    "L5": {
+      "name": "主视觉学术封面",
+      "category": "开场与导航",
+      "purpose": "学术分享、课程作业、实验进展的统一开场。"
+    },
+    "L6": {
+      "name": "章节地图式目录",
+      "category": "开场与导航",
+      "purpose": "把汇报章节与论证顺序同时展示。"
+    },
+    "L7": {
+      "name": "章节过渡与导航",
+      "category": "开场与导航",
+      "purpose": "章节切换；底部导航提示当前进度。"
+    },
+    "L8": {
+      "name": "三栏系统架构",
+      "category": "机制与技术",
+      "purpose": "技术路线、系统架构、方法体系；中栏承担主要图解。",
+      "variants": [
+        "default",
+        "original_figure"
+      ]
+    },
+    "L9": {
+      "name": "双机制对照与比较表",
+      "category": "机制与技术",
+      "purpose": "竞争假说、方法比较、两种解释的检验。",
+      "variants": [
+        "default",
+        "swap_columns",
+        "original_figure"
+      ]
+    },
+    "L10": {
+      "name": "中心模型与两翼证据",
+      "category": "机制与技术",
+      "purpose": "核心模型、作用机制、数据输入与结果输出。",
+      "variants": [
+        "default",
+        "original_figure"
+      ]
+    },
+    "L11": {
+      "name": "四联数据证据图",
+      "category": "结果与归纳",
+      "purpose": "展示多个互补结果；统一坐标、图例与面板编号。",
+      "variants": [
+        "default",
+        "swap_rows",
+        "original_figure"
+      ]
+    },
+    "L12": {
+      "name": "六维问题与应对",
+      "category": "结果与归纳",
+      "purpose": "研究局限、挑战归纳、课程讨论与改进方案。"
+    },
+    "L13": {
+      "name": "研究演进与展望",
+      "category": "结果与归纳",
+      "purpose": "归纳研究演进、下一步路线与预期交付。"
+    },
+    "L14": {
+      "name": "讨论与结束页",
+      "category": "开场与导航",
+      "purpose": "收束汇报、提出讨论问题、进入答疑。"
+    },
+    "L15": {
+      "name": "单篇论文导读型",
+      "category": "原图与证据",
+      "purpose": "单篇论文导读型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "figure_left"
+      ]
+    },
+    "L16": {
+      "name": "大图证据讲解型",
+      "category": "原图与证据",
+      "purpose": "大图证据讲解型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "figure_right",
+        "full_width"
+      ]
+    },
+    "L17": {
+      "name": "全貌与局部放大型",
+      "category": "原图与证据",
+      "purpose": "全貌与局部放大型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "detail_left"
+      ]
+    },
+    "L18": {
+      "name": "研究区与采样设计型",
+      "category": "原图与证据",
+      "purpose": "研究区与采样设计型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "map_right"
+      ]
+    },
+    "L19": {
+      "name": "实验分组与时间轴型",
+      "category": "原图与证据",
+      "purpose": "实验分组与时间轴型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "two_groups"
+      ]
+    },
+    "L20": {
+      "name": "多篇文献证据矩阵型",
+      "category": "原图与证据",
+      "purpose": "多篇文献证据矩阵型",
+      "renderer": "scripts/evidence_layouts.py",
+      "variants": [
+        "default",
+        "table_full"
+      ]
+    },
+    "L21": {
+      "name": "大图与解释型",
+      "category": "紧凑原生版式",
+      "purpose": "大图与解释型",
+      "renderer": "scripts/compact_layouts.py",
+      "variants": [
+        "default",
+        "sidebar",
+        "journal"
+      ]
+    },
+    "L22": {
+      "name": "标准化比较型",
+      "category": "紧凑原生版式",
+      "purpose": "标准化比较型",
+      "renderer": "scripts/compact_layouts.py",
+      "variants": [
+        "default",
+        "fraction",
+        "metrics",
+        "pipeline"
+      ]
+    },
+    "L23": {
+      "name": "阶段任务与计划型",
+      "category": "紧凑原生版式",
+      "purpose": "阶段任务与计划型",
+      "renderer": "scripts/compact_layouts.py",
+      "variants": [
+        "default",
+        "lanes"
+      ]
+    }
+  },
+  "rules": {
+    "intake_order": [
+      "scenario",
+      "palette",
+      "fill_style"
+    ],
+    "accent_max_terms": 4,
+    "content_plot_fraction_min": 0.66,
+    "same_deck_single_palette": true,
+    "no_full_slide_raster": true,
+    "default_chart_marker_px": 5,
+    "legend": "direct labels or compact in-chart legend; never enlarge outer chart to hide small plot",
+    "raster_boundary": "Detailed ecology illustration only. Titles, labels, diagram nodes and data plots must be native."
+  },
+  "fill_styles": {
+    "light": {
+      "name": "轻盈浅底",
+      "description": "保留v1.0低饱和辅助色、浅底卡片与线性图标"
+    },
+    "solid": {
+      "name": "厚实实底",
+      "description": "明净主色、深色实底白字栏目、实心图标与清晰边框；内容与绘图区留白"
+    }
+  },
+  "solid_palettes": {
+    "P1": {
+      "name": "蓝白朱红",
+      "primary": "#1359A0",
+      "secondary": "#2685C9",
+      "accent": "#B82D32",
+      "paper": "#FFFFFF",
+      "tint": "#EDF5FF",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P2": {
+      "name": "松绿米白",
+      "primary": "#136742",
+      "secondary": "#429C6B",
+      "accent": "#BD4F22",
+      "paper": "#FFFFFF",
+      "tint": "#EFF9F2",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P3": {
+      "name": "石墨青金",
+      "primary": "#07556B",
+      "secondary": "#1498AD",
+      "accent": "#B77B08",
+      "paper": "#FFFFFF",
+      "tint": "#EDF9FC",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P4": {
+      "name": "酒红灰蓝",
+      "primary": "#8F2445",
+      "secondary": "#2879AD",
+      "accent": "#AB7210",
+      "paper": "#FFFFFF",
+      "tint": "#FFF1F5",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P5": {
+      "name": "靛紫芥黄",
+      "primary": "#4D319F",
+      "secondary": "#7960D0",
+      "accent": "#A87D05",
+      "paper": "#FFFFFF",
+      "tint": "#F4F0FF",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P6": {
+      "name": "湖蓝珊瑚",
+      "primary": "#087F9A",
+      "secondary": "#20A9BC",
+      "accent": "#CB4442",
+      "paper": "#FFFFFF",
+      "tint": "#EFFBFF",
+      "description": "厚实实底版：提高色彩纯度，白底，较强主次对比"
+    },
+    "P7": {
+      "primary": "#A84B22",
+      "secondary": "#D5884D",
+      "accent": "#245C6D",
+      "paper": "#FFFCF7",
+      "tint": "#FFF0DF",
+      "ink": "#292C30",
+      "name": "赭橙米白",
+      "description": "温暖而清晰的科研编辑风，赭橙只承担标题、实底小标题与核心曲线，画布接近白色的暖白，正文深墨色，少量深青蓝比较色。"
+    },
+    "P8": {
+      "primary": "#15385C",
+      "secondary": "#426B91",
+      "accent": "#AE7A25",
+      "paper": "#FFFFFF",
+      "tint": "#EDF3F9",
+      "ink": "#202C3A",
+      "name": "深蓝香槟金",
+      "description": "精致的深海军蓝学术汇报，深蓝实底块配白字，香槟金只点亮小标签和重点数据，白底通透，不用金色铺满正文，不做金属质感。"
+    },
+    "P9": {
+      "primary": "#006A6C",
+      "secondary": "#168E92",
+      "accent": "#6854A4",
+      "paper": "#FFFFFF",
+      "tint": "#E8F6F4",
+      "ink": "#16393C",
+      "name": "孔雀青白",
+      "description": "清晰鲜明的孔雀青与纯白学术图表风，清爽而厚实，少量柔紫作为比较系列，正文深墨色，图表占比大、分组层级明确，避免灰绿和灰蒙蒙。"
+    },
+    "P10": {
+      "primary": "#22252A",
+      "secondary": "#616974",
+      "accent": "#BE3038",
+      "paper": "#FFFFFF",
+      "tint": "#F3F4F5",
+      "ink": "#22252A",
+      "name": "黑白朱红",
+      "description": "高质量学术期刊编辑风，近黑标题、纯白底、朱红仅用于一个关键系列或关键词，衬线大标题配现代无衬线正文，粗细线与留白形成层级，完全无花纹。"
+    }
+  },
+  "solid_typography": {
+    "canvas_units": "px at 1280x720; 1px=0.75pt",
+    "title": 42,
+    "body_preferred": [
+      21,
+      25
+    ],
+    "auxiliary_min": 17,
+    "chart_min": 17,
+    "footnote": 14,
+    "content_side_margin": 32,
+    "exceptions": [
+      "L5 cover",
+      "L6 contents",
+      "L7 section",
+      "L14 ending"
+    ],
+    "rule": "厚实版按1280×720画布：内容页标题42px（31.5pt），正文优先21–25px（15.75–18.75pt），辅助说明与图表标注至少17px（12.75pt），页脚14px。左右内容边距32px（各2.5%），内容对齐同一纵线；封面、目录与章节页保留专用构图。标题框和段落随字号扩展，语义换行避免单字落行；环形节点文字应完全落在色块内。坐标标题与刻度分开预留空间，不以缩字解决重叠，技术路线与数据图仍为主体。逐页将实际PPT渲染与批准生图并排检查比例、对齐、留白及字重，不以自动溢出检查替代目视核对。",
+    "table_header": 21,
+    "table_data": 20
+  },
+  "accepted_standard": {
+    "id": "approved-solid-v1.1",
+    "user_approved_date": "2026-10-19",
+    "snapshot": "references/approved-standard.json"
+  },
+  "v1_2_update": {
+    "date": "2026-10-20",
+    "summary": "引入 adaptive 自适应资料模式；新增 15 类线框图标；scatter 默认移除模板趋势线；L4 表格列宽与字号归一化；audit --strict 字体/字号/碰撞检查。"
+  },
+  "image_slots": {
+    "L2": {
+      "main": "34"
+    },
+    "L5": {
+      "main": "22"
+    },
+    "L7": {
+      "main": "45"
+    },
+    "L8": {
+      "main": "37"
+    },
+    "L9": {
+      "left_before": "7",
+      "left_after": "9",
+      "right_before": "17",
+      "right_after_1": "19",
+      "right_after_2": "20",
+      "right_after_3": "21",
+      "right_after_4": "22"
+    },
+    "L14": {
+      "main": "5"
+    }
+  },
+  "table_regions": {
+    "L1": {
+      "y": 270,
+      "height": 72
+    },
+    "L3": {
+      "y": 478,
+      "height": 136
+    },
+    "L4": {
+      "y": 282,
+      "height": 290
+    },
+    "L9": {
+      "y": 510,
+      "height": 138
+    }
+  },
+  "evidence_policy": {
+    "required_formal_inventory": "materials.papers",
+    "paper_figure_gate": "Every relevant paper requires an embedded verified complete PDF figure crop",
+    "editing": "No redraw or recomposition without explicit user request",
+    "notes": "Inventory truthfulness and crop completeness require visual verification; hashes prove byte identity, not scientific correctness."
+  },
+  "composition_policy": {
+    "side_margin": 32,
+    "main_figure_width_fraction": [
+      0.65,
+      1.0
+    ],
+    "caption_px": 20,
+    "source_px": 17,
+    "figure_fit": "contain",
+    "rhythm": "Do not repeat the same card structure for three consecutive content slides. Use comparison columns only for genuine comparisons."
+  },
+  "components": [
+    "figure_number",
+    "caption",
+    "source",
+    "zoom_frame",
+    "number",
+    "navigation"
+  ],
+  "compact_typography": {
+    "title": 36,
+    "body": [
+      20,
+      21
+    ],
+    "section": 23,
+    "chart_min": 17,
+    "footnote": 14,
+    "content_side_margin": 32,
+    "scope": "L21-L23 only; existing approved layouts retain their typography"
+  },
+  "approved_compact": {
+    "date": "2026-10-23",
+    "reference_pages": [
+      2,
+      4,
+      5,
+      8,
+      9,
+      10
+    ],
+    "palette_ids": [
+      "P7",
+      "P8",
+      "P9",
+      "P10"
+    ],
+    "bindings": "assets/templates/compact-bindings.json"
+  }
+}

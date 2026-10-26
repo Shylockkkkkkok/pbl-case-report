@@ -11,3 +11,7 @@ Thumbs.db
 
 # 模板库要进仓库
 !templates/xjtu/*.pptx
+
+# 内置第三方 skill：模板与素材必须完整分发
+!skills/editable-research-ppt/**/*.pptx
+!skills/editable-research-ppt/**/*.pdf
