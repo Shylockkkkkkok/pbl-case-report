@@ -8,3 +8,6 @@ preview2/
 *.pdf
 .DS_Store
 Thumbs.db
+
+# 模板库要进仓库
+!templates/xjtu/*.pptx
