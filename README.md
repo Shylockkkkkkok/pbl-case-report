@@ -88,11 +88,12 @@ reference/
 
 > 全部模板合计约 62 MB，克隆仓库时会一并下载。
 
-## 内置第三方 skill
+## 内置 PPT 引擎
 
-`skills/editable-research-ppt/` 原样收录自 [Daylily-Huang/ScholarFlow](https://github.com/Daylily-Huang/ScholarFlow)（v1.7.1），用于生成可编辑的科研 PPTX。
+`.vendor/editable-research-ppt/` 原样收录自 [Daylily-Huang/ScholarFlow](https://github.com/Daylily-Huang/ScholarFlow)（v1.7.1），用于生成可编辑的科研 PPTX。
 
 - 代码与模板：**MIT**，版权归 `editable-research-ppt contributors`，见其 `LICENSE`
 - 字体：SIL OFL 1.1；图标与素材：ISC / CC0 / CC BY 等，逐项记录在 `THIRD_PARTY_NOTICES.md` 与 `assets/media-library/licenses/`
 
-本仓库只做收录，未修改其内容。使用时以其自带 `SKILL.md` 为准。
+本仓库只做收录，未修改其内容；需要可编辑科研 PPT 时由主 `SKILL.md` 路由到它，
+因此**整个仓库对外仍然只有一个 skill**（`pbl-case-report`）。

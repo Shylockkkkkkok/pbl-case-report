@@ -19,6 +19,7 @@ description: "Use this skill whenever the user hands you a PBL (problem-based le
 | `reference/ppt_helpers.js` | pptxgenjs 版式库（标题、要点卡、图表卡、图标、数据图适配） |
 | `reference/figures.py` | matplotlib 中文图表 + 机制通路图（含中文字体设置） |
 | `reference/qa.py` | PPT 版面几何自检 + 纯 Python 预览渲染（不启动 Office） |
+| `.vendor/editable-research-ppt/` | 内置第三方引擎：可编辑科研 PPT（MIT）。需要时读它自己的 `SKILL.md` |
 
 ---
 
@@ -229,6 +230,21 @@ rf.set(qn("w:eastAsia"), "黑体")
 **可编辑的原生形状 PPT、十套配色、按论文资料自动匹配版式**，或明确指名该 skill 时，
 按它自己的 `SKILL.md` 执行，不要用本文件的版式强行套。
 
+### 两个 PPT 引擎，按需选一个（不要混用）
+
+| 场景 | 用哪套 |
+|---|---|
+| 常规 PBL / 课程汇报、5 分钟、快速成稿 | 本文件的版式（学校模板 + `reference/ppt_helpers.js`） |
+| 明确要求"可编辑的原生形状 PPT"、按论文或实验资料排版、需要十套配色与 23 类版式 | 内置引擎 `.vendor/editable-research-ppt/` |
+
+**用内置引擎时，先读 `.vendor/editable-research-ppt/SKILL.md`，按它执行。** 必须遵守：
+
+1. 依次确认：场景（学术分享 `academic` / 课程作业 `coursework` / 实验进展 `progress`）→ 配色（P1–P10）→ 填充（`light` / `solid`）。用户让你决定时用 `P1 + solid`。
+2. 生成前 `python scripts/preflight.py --input INPUT.json`；生成后用 `python scripts/inspect_deck.py` 核对对象与外链。
+3. **不得编造数据**。有论文原图时必须从原文裁取（`scripts/crop_paper_figure.py`），不能用自绘图替代；缺材料如实标注。
+4. **不要修改** `.vendor/editable-research-ppt/` 里的任何文件——它带 SHA256 完整性校验（`scripts/verify_release.py`）。要改样式就复制出来改。
+5. 素材许可与署名规则见其 `THIRD_PARTY_NOTICES.md`。
+
 ### 学校模板优先（西安交通大学）
 
 `templates/xjtu/` 内置 7 套交大模板，详见该目录的 `README.md`。**默认用 `飞上云霄.pptx`**（16:9，西交蓝 `#00A5E0`，微软雅黑，空白版式自带校徽）。
@@ -407,3 +423,4 @@ Word 同理：读 XML 断言字体/颜色，不要靠肉眼。
 - [ ] 无负的 `cx/cy`
 - [ ] 图注未压到图体
 - [ ] 未使用 PowerPoint COM
+- [ ] 若用了内置引擎：`verify_release.py` 通过，且未改动 `.vendor/` 内文件
