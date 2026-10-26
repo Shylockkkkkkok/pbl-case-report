@@ -424,6 +424,16 @@ def check_refs(heading="参考文献", verbose=True):
     if listed - cited:
         problems.append("文献表有条目未被正文引用：%s" % sorted(listed - cited))
 
+    # GB/T 7714 基本格式
+    for n in sorted(entries):
+        txt = entries[n]
+        if not re.search(r"\[(J/OL|J|M)\]", txt):
+            problems.append("[%d] 缺少 [J]/[M] 文献类型标识" % n)
+        elif "[M]" not in txt:
+            has_pages = re.search(r"\d{4},\s*[^:]+:\s*[A-Za-z]?\d", txt)
+            if not has_pages and "DOI" not in txt.upper():
+                problems.append("[%d] 缺卷期页码且无 DOI" % n)
+
     if verbose:
         print("参考文献检查：", "通过" if not problems else problems)
     return not problems

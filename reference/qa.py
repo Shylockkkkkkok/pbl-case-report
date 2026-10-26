@@ -269,6 +269,54 @@ def render(prs, outdir):
 
 
 # ============================================================
+def check_refs(prs):
+    """页脚引用编号必须按幻灯片顺序首次出现为 1,2,3…，且与文献页一一对应。"""
+    ref_idx = None
+    for i, s in enumerate(prs.slides):
+        for sh in s.shapes:
+            if sh.has_text_frame and sh.text_frame.text.strip() == "参考文献":
+                ref_idx = i
+                break
+        if ref_idx is not None:
+            break
+    if ref_idx is None:
+        return []
+
+    order = []
+    for i, s in enumerate(prs.slides):
+        if i == ref_idx:
+            continue
+        for sh in s.shapes:
+            if not sh.has_text_frame:
+                continue
+            for m in re.finditer(r"\[(\d+)\]", sh.text_frame.text):
+                n = int(m.group(1))
+                if n not in order:
+                    order.append(n)
+
+    listed = set()
+    for sh in prs.slides[ref_idx].shapes:
+        if not sh.has_text_frame:
+            continue
+        for para in sh.text_frame.paragraphs:
+            m = re.match(r"^\s*\[(\d+)\]", para.text)
+            if m:
+                listed.add(int(m.group(1)))
+
+    out = []
+    if order != sorted(order):
+        out.append("页脚首次引用顺序不是递增: %s" % order)
+    if order and order[0] != 1:
+        out.append("第一条引用不是 [1]: %s" % order[0])
+    missing = [n for n in order if n not in listed]
+    if missing:
+        out.append("正文引用了文献页没有的编号: %s" % missing)
+    unused = sorted(n for n in listed if n not in order)
+    if unused:
+        out.append("文献页有正文未引用的条目（可接受，但需确认）: %s" % unused)
+    return out
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -290,6 +338,11 @@ def main():
                 cur = si
             print("  [%s] %s\n      %s" % (kind, detail, txt))
     print("\n合计:", len(problems), "（OUT-OF-BOUNDS 若为装饰性出血图形可忽略）")
+
+    ref_problems = check_refs(prs)
+    print("\n参考文献顺序检查：", "通过" if not ref_problems else "有问题")
+    for msg in ref_problems:
+        print("  ⚠", msg)
 
     if len(sys.argv) > 2:
         render(prs, sys.argv[2])
