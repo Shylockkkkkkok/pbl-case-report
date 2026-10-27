@@ -300,6 +300,8 @@ python reference/apply_school_skin.py   --deck OUTPUT.pptx   --template template
 
 套壳后**必须再跑一次** `python reference/qa.py FINAL.pptx`，确认没有新的重叠或溢出。
 
+**图文并茂**：纯文字页偏多时，用 `reference/add_image_slide.py` 插入配图页（病例照片、效应量图、机制示意图）。图片来源必须是真实材料——病例图从案例 PDF 抠、数据图用真实数值、示意图需标注「示意图」。
+
 #### 学校模板的使用细则
 
 `templates/xjtu/` 内置 3 套交大模板，详见该目录的 `README.md`。**按主题选，不设默认。**
