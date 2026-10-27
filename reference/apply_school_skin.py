@@ -135,6 +135,11 @@ def main():
     ap.add_argument("--cover", type=int, default=1, help="模板封面页序号（1 起）")
     ap.add_argument("--thanks", type=int, default=-1, help="模板致谢页序号（1 起，-1=自动）")
     ap.add_argument("--no-logo", action="store_true")
+    ap.add_argument("--logo-scale", type=float, default=0.6, help="校徽缩放倍数，默认 0.6")
+    ap.add_argument("--cover-title", help="替换封面大标题（第二大的文字）")
+    ap.add_argument("--cover-hide-university", action="store_true", help="删除封面最大的那行（通常是校名）")
+    ap.add_argument("--presenter", help="替换“汇报人：”后的内容")
+    ap.add_argument("--date", help="替换“日期：”后的内容")
     a = ap.parse_args()
 
     deck = Presentation(a.deck)
@@ -174,6 +179,19 @@ def main():
                 # 克隆版式里的图片元素本身，保留 srcRect 裁剪与位置
                 el = copy.deepcopy(logo._element)
                 remap_rels(el, logo.part, slide)
+                if a.logo_scale and abs(a.logo_scale - 1.0) > 1e-6:
+                    NS_A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+                    xfrm = el.find(".//{%s}xfrm" % NS_A)
+                    if xfrm is not None:
+                        off = xfrm.find("{%s}off" % NS_A)
+                        ext = xfrm.find("{%s}ext" % NS_A)
+                        if off is not None and ext is not None:
+                            x, y = int(off.get("x")), int(off.get("y"))
+                            cx, cy = int(ext.get("cx")), int(ext.get("cy"))
+                            ncx, ncy = int(cx * a.logo_scale), int(cy * a.logo_scale)
+                            ext.set("cx", str(ncx)); ext.set("cy", str(ncy))
+                            off.set("x", str(x + cx - ncx))
+                            off.set("y", str(y + (cy - ncy) // 2))
                 slide.shapes._spTree.append(el)
                 # 页码若落在校徽下面，挪到右下角
                 lx, ly = logo.left, logo.top
@@ -184,11 +202,52 @@ def main():
                     if shp.left < rx and shp.left + shp.width > lx and shp.top < ry and shp.top + shp.height > ly:
                         shp.left = Emu(int(12.30 * 914400))
                         shp.top = Emu(int(6.95 * 914400))
-                bar = slide.shapes.add_shape(1, Emu(int(0.62 * 914400)), Emu(int(7.28 * 914400)),
-                                             Emu(int(12.1 * 914400)), Emu(int(0.045 * 914400)))
+                bar = slide.shapes.add_shape(1, Emu(int(0.62 * 914400)),
+                                             Emu(int((deck.slide_height / 914400 - 0.055) * 914400)),
+                                             Emu(int(12.1 * 914400)), Emu(int(0.04 * 914400)))
                 bar.fill.solid(); bar.fill.fore_color.rgb = color
                 bar.line.fill.background()
                 bar.shadow.inherit = False
+
+    # 4) 封面文字
+    if a.cover_title or a.presenter or a.date:
+        def texts(slide):
+            out = []
+            def walk(shapes):
+                for sh in shapes:
+                    if sh.shape_type == MSO_SHAPE_TYPE.GROUP:
+                        walk(sh.shapes)
+                    elif sh.has_text_frame and sh.text_frame.text.strip():
+                        out.append(sh)
+            walk(slide.shapes)
+            return out
+
+        def size_of(sh):
+            vals = [r.font.size.pt for p in sh.text_frame.paragraphs for r in p.runs if r.font.size]
+            return max(vals) if vals else 0
+
+        def put(sh, text):
+            ps = sh.text_frame.paragraphs
+            if ps and ps[0].runs:
+                ps[0].runs[0].text = text
+                for r in ps[0].runs[1:]:
+                    r.text = ""
+            else:
+                sh.text_frame.text = text
+
+        cover_slide = deck.slides[0]
+        items = sorted(texts(cover_slide), key=size_of, reverse=True)
+        if a.cover_hide_university and items:
+            items[0]._element.getparent().remove(items[0]._element)
+            items = items[1:]
+        if a.cover_title and items:
+            put(items[0], a.cover_title)
+        for sh in items:
+            t = sh.text_frame.text.strip()
+            if a.presenter and t.startswith("汇报人"):
+                put(sh, "汇报人：" + a.presenter)
+            elif a.date and ("日期" in t or t.replace(" ", "").startswith("日期")):
+                put(sh, "日   期：" + a.date)
 
     deck.save(a.out)
     print("saved", a.out, len(deck.slides), "slides")
