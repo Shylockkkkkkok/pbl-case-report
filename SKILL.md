@@ -278,6 +278,18 @@ rf.set(qn("w:eastAsia"), "黑体")
 
 **没有任何"默认模板"。** 每次都要给出选型理由（一句话），让用户有机会改。现有 4 套全部为 16:9。
 
+#### 引擎 + 校徽：用 `apply_school_skin.py` 组合
+
+引擎不能直接加载外部 `.pptx` 模板，但可以先出稿、再套壳：
+
+```bash
+python reference/apply_school_skin.py   --deck OUTPUT.pptx   --template templates/xjtu/飞上云霄.pptx   --out FINAL.pptx
+```
+
+它做三件事：用所选模板的**封面页**替换第 1 页、用**致谢页**替换末页、给每个内容页贴**校徽**（保留 `srcRect` 裁剪）并在底部加一条校色线；页码若被校徽压住会自动挪到右下角。
+
+套壳后**必须再跑一次** `python reference/qa.py FINAL.pptx`，确认没有新的重叠或溢出。
+
 #### 学校模板的使用细则
 
 `templates/xjtu/` 内置 7 套交大模板，详见该目录的 `README.md`。**按主题选，不设默认。**
@@ -457,3 +469,4 @@ Word 同理：读 XML 断言字体/颜色，不要靠肉眼。
 - [ ] 图注未压到图体
 - [ ] 未使用 PowerPoint COM
 - [ ] 若用了内置引擎：`verify_release.py` 通过，且未改动 `.vendor/` 内文件
+- [ ] 若套了学校外观：`apply_school_skin.py` 之后重新跑过 `qa.py`

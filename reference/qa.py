@@ -151,6 +151,17 @@ def render(prs, outdir):
             if st == MSO_SHAPE_TYPE.PICTURE:
                 try:
                     im = Image.open(io.BytesIO(sh.image.blob)).convert("RGBA")
+                    # 应用 PowerPoint 的 srcRect 裁剪（模板里的校徽常靠它只露一枚）
+                    crop = re.search(r"<a:srcRect([^/]*)/>", sh._element.xml)
+                    if crop:
+                        at = dict(re.findall(r'(\w)="(-?\d+)"', crop.group(1)))
+                        cl = int(at.get("l", 0)) / 100000.0
+                        ct = int(at.get("t", 0)) / 100000.0
+                        cr = int(at.get("r", 0)) / 100000.0
+                        cb = int(at.get("b", 0)) / 100000.0
+                        iw, ih = im.size
+                        im = im.crop((int(iw * cl), int(ih * ct),
+                                      int(iw * (1 - cr)), int(ih * (1 - cb))))
                     im = im.resize((max(1, int(w)), max(1, int(h))), Image.LANCZOS)
                     img.paste(im, (int(l), int(t)), im)
                 except Exception:
