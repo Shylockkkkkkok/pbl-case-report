@@ -135,6 +135,7 @@ def main():
     ap.add_argument("--cover", type=int, default=1, help="模板封面页序号（1 起）")
     ap.add_argument("--thanks", type=int, default=-1, help="模板致谢页序号（1 起，-1=自动）")
     ap.add_argument("--no-logo", action="store_true")
+    ap.add_argument("--cover-only", action="store_true", help="只换封面，不动致谢页")
     ap.add_argument("--logo-scale", type=float, default=0.6, help="校徽缩放倍数，默认 0.6")
     ap.add_argument("--cover-title", help="替换封面大标题（第二大的文字）")
     ap.add_argument("--cover-hide-university", action="store_true", help="删除封面最大的那行（通常是校名）")
@@ -156,14 +157,16 @@ def main():
     orig_thanks = orig_thanks - 1 if orig_thanks > 0 else None
 
     cover_new = clone_slide(deck, tpl.slides[a.cover - 1], layout)
-    thanks_new = clone_slide(deck, tpl.slides[tpl_thanks - 1], layout)
+    thanks_new = None if a.cover_only else clone_slide(deck, tpl.slides[tpl_thanks - 1], layout)
 
     victims = [i for i in (orig_cover, orig_thanks) if i is not None]
+    if a.cover_only:
+        victims = [orig_cover]
     for i in sorted(set(victims), reverse=True):
         delete_slide(deck, i)
 
     n = len(deck.slides)
-    move_slide(deck, n - 2, 0)                     # 封面克隆 → 第 1 页
+    move_slide(deck, (n - 2) if thanks_new is not None else (n - 1), 0)   # 封面克隆 → 第 1 页
     # 致谢克隆原本就是最后一页，无需移动
 
     # 3) 校徽 + 校色线
@@ -240,13 +243,26 @@ def main():
         if a.cover_hide_university and items:
             items[0]._element.getparent().remove(items[0]._element)
             items = items[1:]
-        if a.cover_title and items:
-            put(items[0], a.cover_title)
+        # 优先替换明显的占位标题，其次才按字号猜
+        PLACEHOLDERS = ("答辩汇报模板", "汇报答辩通用模板", "单击添加文本",
+                        "单击输入标题", "单击此处添加标题", "XXXX")
+        if a.cover_title:
+            target = None
+            for it in items:
+                txt = it.text_frame.text
+                if any(ph in txt for ph in PLACEHOLDERS) and "大学" not in txt:
+                    target = it
+                    break
+            if target is None and items:
+                target = items[0] if a.cover_hide_university else items[1 if len(items) > 1 else 0]
+            if target is not None:
+                put(target, a.cover_title)
         for sh in items:
             t = sh.text_frame.text.strip()
-            if a.presenter and t.startswith("汇报人"):
+            if a.presenter and (t.startswith("汇报人") or "网络信息中心" in t):
                 put(sh, "汇报人：" + a.presenter)
-            elif a.date and ("日期" in t or t.replace(" ", "").startswith("日期")):
+            elif a.date and ("日期" in t or t.replace(" ", "").startswith("日期")
+                             or __import__("re").search(r"20\d{2}\s*年", t)):
                 put(sh, "日   期：" + a.date)
 
     deck.save(a.out)
