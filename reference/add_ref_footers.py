@@ -16,9 +16,9 @@ from pptx.dml.color import RGBColor
 ap = argparse.ArgumentParser()
 ap.add_argument("--deck", required=True)
 ap.add_argument("--map", required=True)
-ap.add_argument("--size", type=float, default=8.8)
+ap.add_argument("--size", type=float, default=7.8)
 ap.add_argument("--color", default="7A8B99")
-ap.add_argument("--bottom-margin", type=float, default=1.10, help="距底距离（英寸）")
+ap.add_argument("--bottom-margin", type=float, default=0.98, help="距底距离（英寸）")
 a = ap.parse_args()
 
 prs = Presentation(a.deck)
@@ -38,7 +38,7 @@ for key, val in refs.items():
     if not (0 <= i < len(prs.slides)):
         continue
     slide = prs.slides[i]
-    tb = slide.shapes.add_textbox(Inches(0.55), Inches(H - margin), Inches(W - 1.1), Inches(0.42 if size >= 8.5 else 0.24))
+    tb = slide.shapes.add_textbox(Inches(0.55), Inches(H - margin), Inches(W - 1.1), Inches(0.30))
     tf = tb.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_right = Inches(0.02)

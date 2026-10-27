@@ -328,6 +328,37 @@ def check_refs(prs):
     return out
 
 
+def check_footer_overlap(prs):
+    """页脚参考文献不得压到任何文字或卡片。"""
+    EMU = 914400.0
+    out = []
+    for i, slide in enumerate(prs.slides, 1):
+        foot = None
+        for sh in slide.shapes:
+            t = sh.text_frame.text.strip() if sh.has_text_frame else ""
+            if t.startswith("参考文献") and "[" in t:
+                foot = sh
+                break
+        if foot is None:
+            continue
+        fx, fy = foot.left / EMU, foot.top / EMU
+        fw, fh = foot.width / EMU, foot.height / EMU
+        for sh in slide.shapes:
+            if sh._element is foot._element or not sh.has_text_frame or not sh.text_frame.text.strip():
+                continue
+            try:
+                x, y, w, h = sh.left / EMU, sh.top / EMU, sh.width / EMU, sh.height / EMU
+            except Exception:
+                continue
+            ox = min(fx + fw, x + w) - max(fx, x)
+            oy = min(fy + fh, y + h) - max(fy, y)
+            if ox > 0.02 and oy > 0.02:
+                out.append((i, "FOOTER-OVERLAP",
+                            "%.2fx%.2f\"" % (ox, oy),
+                            sh.text_frame.text.strip()[:24]))
+    return out
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -349,6 +380,12 @@ def main():
                 cur = si
             print("  [%s] %s\n      %s" % (kind, detail, txt))
     print("\n合计:", len(problems), "（OUT-OF-BOUNDS 若为装饰性出血图形可忽略）")
+
+    foot_problems = check_footer_overlap(prs)
+    if foot_problems:
+        print("\n页脚遮挡检查：")
+        for si, kind, detail, txt in foot_problems:
+            print("  第 %02d 页 [%s] %s  %s" % (si, kind, detail, txt))
 
     ref_problems = check_refs(prs)
     print("\n参考文献顺序检查：", "通过" if not ref_problems else "有问题")
