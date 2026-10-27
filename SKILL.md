@@ -230,36 +230,57 @@ rf.set(qn("w:eastAsia"), "黑体")
 **可编辑的原生形状 PPT、十套配色、按论文资料自动匹配版式**，或明确指名该 skill 时，
 按它自己的 `SKILL.md` 执行，不要用本文件的版式强行套。
 
-### PPT 引擎：两套，按场景选一套
+### PPT 生产：必须走引擎，模板按主题选（都不要默认）
 
-本 skill 自带两套 PPT 能力。**先判断用哪套，再动手；不要混用。**
+**硬要求：做 PPT 一律调用 `editable-research-ppt`。** 不要凭本文件的开发经验手搓版式——
+先读 `.vendor/editable-research-ppt/SKILL.md`，用它的 `generate.py` 生成、`audit.py --strict` 验收。
 
-| 场景 | 引擎 | 产物 |
-|---|---|---|
-| 常规 PBL / 课程汇报、5 分钟、要快 | 本文件的版式 + `templates/xjtu/` 学校模板 | 13 页左右，半页排版 |
-| 要求原生可编辑、按论文或实验资料排版、十套配色、23 类版式 | `.vendor/editable-research-ppt/` | 可编辑 PPTX，含论文原图 |
+#### 引擎的完整流程
 
-#### 引擎 B 的完整流程（editable-research-ppt）
-
-**先读 `.vendor/editable-research-ppt/SKILL.md`，它才是该引擎的权威说明。** 接进本 skill 时，以下几条必须遵守：
-
-1. **三问**：场景（学术分享 `academic` / 课程作业 `coursework` / 实验进展 `progress`）→ 配色 P1–P10 → 填充（`light` 轻盈浅底 / `solid` 厚实实底）。已明确的沿用，不重复问；用户委托时默认 `P1 + solid`。
-2. **输入是 JSON**：逐页写 `layout`（`L1`–`L23`）与 `variant`，并显式声明 `demo: false`、`fill_style`。版式只从 `assets/template-system.json` 里选，按内容匹配，不要机械套满。
-3. **命令**（在 `.vendor/editable-research-ppt/` 目录下执行）：
+1. **三问**：场景（`academic` / `coursework` / `progress`）→ 配色 → 填充（`light` / `solid`）。
+   配色**按主题选**，见下表，**不设默认**；用户说"你定"时也要先按主题判断一次再选。
+2. **输入 JSON**：逐页写 `layout`（`L1`–`L23`）与 `variant`，显式声明 `demo: false`、`fill_style`。
+3. **命令**（在 `.vendor/editable-research-ppt/` 下执行）：
    ```console
    python scripts/check_environment.py
    python scripts/preflight.py --input INPUT.json
    python scripts/generate.py --input INPUT.json --output OUTPUT.pptx --force
    python scripts/audit.py OUTPUT.pptx --strict     # 必须 0 Error、0 Warning
    ```
-4. **字号基线**：常规版 L1–L20 标题 42px、正文 21–25px、页脚 14px；紧凑版 L21–L23 标题 36px、正文 20–21px。不要用旧版字号规则覆盖紧凑版。
-5. **图片**：先查 `image_slots`。有论文原图时**必须从原文裁取**（`scripts/crop_paper_figure.py`，PNG 才能插入），保留原色、比例、坐标与图例；**不得用自绘图替代实测图，不得编造数据**。来源写进 `sources`。
-6. **完整性**：不要修改 `.vendor/editable-research-ppt/` 里的任何文件（它带 SHA256 校验）。要改样式就复制出来改；交付前 `python scripts/verify_release.py` 必须为 `ok`。
-7. 两套引擎**共用**本文件的参考文献规范：GB/T 7714 + 按首次引用顺序编号 + 不缺页码。
+4. **字号**：常规版 L1–L20 标题 42px、正文 21–25px；紧凑版 L21–L23 标题 36px、正文 20–21px。
+5. **图片**：有论文原图时必须从原文裁取（`scripts/crop_paper_figure.py`），不得自绘替代、不得编数据。
+6. 不得修改 `.vendor/` 内文件；交付前 `verify_release.py` 必须为 `ok`。
 
-### 学校模板优先（西安交通大学）
+#### 配色按主题选（P1–P10）
 
-`templates/xjtu/` 内置 7 套交大模板，详见该目录的 `README.md`。**默认用 `飞上云霄.pptx`**（16:9，西交蓝 `#00A5E0`，微软雅黑，空白版式自带校徽）。
+| 主题 | 建议配色 | 理由 |
+|---|---|---|
+| 临床医学、内科学、诊断 | P1 蓝白朱红 / P9 孔雀青白 | 冷静、不抢影像图 |
+| 基础医学、生理、病理机制 | P3 石墨青金 / P6 湖蓝珊瑚 | 高对比，适合通路图 |
+| 公共卫生、流行病、队列 | P2 松绿米白 | 自然、适合地图与曲线 |
+| 神经、精神、认知 | P5 靛紫芥黄 | 层级清晰 |
+| 药理学、毒理、分子 | P8 深蓝香槟金 | 强调剂量/结构 |
+| 护理、人文、伦理 | P4 酒红灰蓝 / P7 赭橙米白 | 柔和 |
+| 需要极简黑白 | P10 黑白朱红 | 印刷友好 |
+
+拿不准时，**先说明你的判断和理由**，再问用户要不要换；不要默默套一个固定配色。
+
+#### 学校模板：只在需要校徽/校色时用，同样按主题选
+
+引擎**不能加载外部 .pptx 模板**，所以学校模板与引擎版式不能叠在同一份 deck 上。
+需要交大品牌时走模板路线，从 `templates/xjtu/` 里选：
+
+| 主题 / 场合 | 模板 | 理由 |
+|---|---|---|
+| 临床/基础医学学术汇报 | `飞上云霄`（蓝白） | 干净，蓝色不抢临床图片 |
+| 正式开题、毕业答辩 | `西安交通大学汇报答辩通用模板`（校红） | 官方感最强 |
+| 工科、创新港相关 | `2022 西安交通大学创新港风格模板` | 主题吻合 |
+
+**没有任何"默认模板"。** 每次都要给出选型理由（一句话），让用户有机会改。现有 4 套全部为 16:9。
+
+#### 学校模板的使用细则
+
+`templates/xjtu/` 内置 7 套交大模板，详见该目录的 `README.md`。**按主题选，不设默认。**
 
 用模板的正确姿势：
 
@@ -269,7 +290,7 @@ rf.set(qn("w:eastAsia"), "黑体")
 4. 页面元素避让右上角校徽：标题宽度不超过约 9 英寸，页码放右下角。
 5. 换页序后参考文献编号会变——必须重新按首次引用顺序编号，见第四节。
 
-若用户没有指定模板，优先 16:9；4:3 的三套只在明确要求时使用。
+用户没有指定时：先按主题给出一套推荐并说明理由，再问是否更换。
 
 
 
