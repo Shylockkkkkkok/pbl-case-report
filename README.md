@@ -83,10 +83,10 @@ reference/
 
 ## 模板库
 
-`templates/xjtu/` 内置 7 套西安交通大学 PPT 模板（已去重），默认使用 `飞上云霄.pptx`。
+`templates/xjtu/` 内置 西安交通大学 PPT 模板
 详见 [templates/xjtu/README.md](templates/xjtu/README.md)。
 
-> 全部模板合计约 62 MB，克隆仓库时会一并下载。
+> 全部模板克隆仓库时会一并下载。
 
 ## 内置 PPT 引擎
 
@@ -94,6 +94,3 @@ reference/
 
 - 代码与模板：**MIT**，版权归 `editable-research-ppt contributors`，见其 `LICENSE`
 - 字体：SIL OFL 1.1；图标与素材：ISC / CC0 / CC BY 等，逐项记录在 `THIRD_PARTY_NOTICES.md` 与 `assets/media-library/licenses/`
-
-本仓库只做收录，未修改其内容；需要可编辑科研 PPT 时由主 `SKILL.md` 路由到它，
-因此**整个仓库对外仍然只有一个 skill**（`pbl-case-report`）。
